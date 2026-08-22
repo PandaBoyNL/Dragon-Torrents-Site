@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dragon-Torrents</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dragon: { 900: '#0f0c0c', 800: '#1a1414', red: '#d91e18', orange: '#e67e22', gold: '#f1c40f' }
+                    },
+                    fontFamily: { 'title': ['Oswald', 'sans-serif'], 'body': ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { background-color: #0f0c0c; color: #f3f4f6; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        
+        .skiptranslate, #google_translate_element, .goog-te-banner-frame { display: none !important; }
+        font { background-color: transparent !important; box-shadow: none !important; pointer-events: none !important; }
+        .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; pointer-events: none !important; }
+        body { position: static !important; min-height: 100vh !important; top: 0 !important; }
+        .VIpgJd-Zvi9od-ORHb-OEVmcd { display: none !important; }
+
+        .dragon-gradient-text { background: linear-gradient(to right, #d91e18, #e67e22); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .dragon-button { background: linear-gradient(135deg, #d91e18, #900C3F); transition: all 0.3s ease; }
+        .dragon-button:hover:not(:disabled) { background: linear-gradient(135deg, #e67e22, #d91e18); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(217, 30, 24, 0.4); }
+        .dragon-button:disabled { opacity: 0.7; cursor: not-allowed; filter: grayscale(100%); }
+        
+        .torrent-card { background: linear-gradient(180deg, #1a1414 0%, #0f0c0c 100%); border: 1px solid #332b2b; transition: all 0.3s ease; }
+        .torrent-card:hover { border-color: #d91e18; box-shadow: 0 0 20px rgba(217, 30, 24, 0.2); transform: translateY(-5px); }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f0c0c; }
+        ::-webkit-scrollbar-thumb { background: #332b2b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #d91e18; }
+        
+        .modal-overlay { backdrop-filter: blur(5px); background-color: rgba(0, 0, 0, 0.8); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    </style>
+</head>
+<body class="font-body text-gray-100 flex flex-col min-h-screen">
+
+    <nav class="border-b border-dragon-red/30 bg-dragon-800/90 sticky top-0 z-40 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer" onclick="closeAllModals(); document.getElementById('searchInput').value = ''; renderTorrents();">
+                    <i class="fa-solid fa-dragon text-4xl text-dragon-red"></i>
+                    <h1 class="font-title text-3xl font-bold tracking-wider dragon-gradient-text hidden sm:block">DRAGON-TORRENTS</h1>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <div class="relative hidden md:block">
+                        <input type="text" id="searchInput" autocomplete="off" spellcheck="false" name="search-torrents" placeholder="Zoek films, series, games..." class="bg-dragon-900 border border-dragon-red/50 text-white px-4 py-2 rounded-full focus:outline-none focus:border-dragon-red w-64 transition-all focus:w-80 placeholder-gray-500">
+                        <i class="fa-solid fa-search absolute right-4 top-3 text-gray-500"></i>
+                    </div>
+                    
+                    <!-- HOVER VERTALEN MENU -->
+                    <div class="relative group">
+                        <button class="text-gray-300 hover:text-dragon-red transition px-3 font-semibold py-2 flex items-center gap-1" title="Vertaal Website">
+                            <i class="fa-solid fa-globe text-xl"></i>
+                        </button>
+                        <div class="absolute right-0 mt-0 w-52 bg-dragon-900 border border-dragon-red/50 rounded-xl shadow-2xl hidden group-hover:block z-50 max-h-80 overflow-y-auto custom-scrollbar p-2">
+                            <div class="text-xs font-bold text-dragon-red px-3 py-1 uppercase tracking-wider border-b border-gray-800 mb-1">Selecteer Taal</div>
+                            <button onclick="setLanguage('nl')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇳🇱 Nederlands</button>
+                            <button onclick="setLanguage('en')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇬🇧 English</button>
+                            <button onclick="setLanguage('es')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇪🇸 Español</button>
+                            <button onclick="setLanguage('de')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇩🇪 Deutsch</button>
+                            <button onclick="setLanguage('fr')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇫🇷 Français</button>
+                            <button onclick="setLanguage('it')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇮🇹 Italiano</button>
+                            <button onclick="setLanguage('pt')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇵🇹 Português</button>
+                            <button onclick="setLanguage('pl')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇵🇱 Polski</button>
+                            <button onclick="setLanguage('tr')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇹🇷 Türkçe</button>
+                            <button onclick="setLanguage('ru')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇷🇺 Русский</button>
+                            <button onclick="setLanguage('ar')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇸🇦 العربية</button>
+                            <button onclick="setLanguage('zh-CN')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇨🇳 中文 (Mandarijn)</button>
+                            <button onclick="setLanguage('ja')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇯🇵 日本語</button>
+                            <button onclick="setLanguage('ko')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇰🇷 한국어</button>
+                            <button onclick="setLanguage('hi')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇮🇳 हिन्दी</button>
+                            <button onclick="setLanguage('uk')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇺🇦 Українська</button>
+                            <button onclick="setLanguage('sv')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇸🇪 Svenska</button>
+                            <button onclick="setLanguage('no')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇳🇴 Norsk</button>
+                            <button onclick="setLanguage('da')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇩🇰 Dansk</button>
+                            <button onclick="setLanguage('fi')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-dragon-red hover:text-white rounded transition">🇫🇮 Suomi</button>
+                        </div>
+                    </div>
+                    
+                    <button onclick="generateRSS()" class="text-gray-300 hover:text-dragon-orange transition px-3 font-semibold hidden sm:block" title="RSS Feed">
+                        <i class="fa-solid fa-rss text-xl"></i>
+                    </button>
+                    
+                    <button onclick="openModal('contactModal')" class="text-gray-300 hover:text-dragon-red transition px-3 font-semibold hidden sm:block">
+                        <i class="fa-solid fa-envelope mr-1"></i> Contact
+                    </button>
+
+                    <button id="navUploadBtn" onclick="openModal('uploadModal')" class="hidden dragon-button px-5 py-2 rounded-full font-bold shadow-lg items-center gap-2">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload
+                    </button>
+                    
+                    <button id="navLoginBtn" onclick="openModal('loginModal')" class="bg-transparent border border-dragon-red text-dragon-red hover:bg-dragon-red hover:text-white px-5 py-2 rounded-full font-bold transition-all">
+                        Inloggen
+                    </button>
+                    
+                    <div id="userInfo" class="hidden items-center gap-3">
+                        <img id="navAvatar" src="https://placehold.co/40x40/d91e18/white?text=U" onclick="openProfileModal()" class="w-10 h-10 rounded-full border-2 border-dragon-red cursor-pointer hover:opacity-80 transition object-cover" alt="User" title="Mijn Profiel">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-7xl">
+        <div class="text-center py-12 mb-8 bg-dragon-900 border border-dragon-red/20 rounded-2xl relative overflow-hidden shadow-2xl">
+            <div class="absolute inset-0 bg-gradient-to-r from-dragon-900 via-dragon-800 to-dragon-900 z-0"></div>
+            <div class="relative z-10 px-4">
+                <h2 class="text-4xl md:text-5xl font-title font-bold mb-4">De Ultieme <span class="dragon-gradient-text">Dragon</span> Collectie</h2>
+                <p class="text-lg text-gray-300 max-w-2xl mx-auto mb-8">Download en deel torrent bestanden met de community. Geverifieerde leden kunnen onbeperkt uploaden naar de private server.</p>
+                <div id="heroAction">
+                    <button id="heroActionBtn" onclick="openModal('loginModal')" class="dragon-button px-8 py-3 rounded-full text-lg font-bold shadow-lg shadow-dragon-red/30">
+                        Word nu lid
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="verificationBanner" class="hidden bg-dragon-orange/10 border border-dragon-orange/50 text-dragon-orange px-4 py-3 rounded-xl mb-6 justify-between items-center shadow-lg flex-col sm:flex-row gap-3">
+            <span><i class="fa-solid fa-envelope-circle-check mr-2 text-xl"></i> Je e-mailadres is nog niet geverifieerd. Controleer je inbox om je account te activeren.</span>
+            <button onclick="resendVerification()" class="bg-dragon-orange text-black px-4 py-2 rounded-lg font-bold hover:bg-white transition text-sm whitespace-nowrap">Stuur opnieuw</button>
+        </div>
+
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-title font-semibold border-l-4 border-dragon-red pl-3">Nieuwste Torrents</h3>
+            <div class="flex gap-2 text-sm flex-wrap">
+                <button onclick="renderTorrents('', 'alles')" class="bg-dragon-800 hover:text-dragon-red px-4 py-2 rounded-lg transition font-semibold">Alles</button>
+                <button onclick="renderTorrents('', 'film')" class="bg-dragon-800/50 hover:bg-dragon-800 px-4 py-2 rounded-lg transition">Films</button>
+                <button onclick="renderTorrents('', 'serie')" class="bg-dragon-800/50 hover:bg-dragon-800 px-4 py-2 rounded-lg transition">Series</button>
+                <button onclick="renderTorrents('', 'game')" class="bg-dragon-800/50 hover:bg-dragon-800 px-4 py-2 rounded-lg transition">Games</button>
+            </div>
+        </div>
+
+        <div id="torrentGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div class="col-span-full flex justify-center py-20 text-gray-500">
+                <i class="fa-solid fa-dragon fa-spin text-5xl text-dragon-red"></i>
+            </div>
+        </div>
+    </main>
+
+    <div id="uploadModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-overlay opacity-0 transition-opacity duration-300">
+        <div class="bg-dragon-800 border border-dragon-red/50 rounded-2xl w-full max-w-lg p-8 relative transform scale-95 transition-transform duration-300 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <button onclick="closeModal('uploadModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            
+            <div class="flex items-center gap-3 mb-6">
+                <i class="fa-solid fa-server text-2xl text-dragon-red"></i>
+                <h2 class="text-2xl font-title font-bold">Nieuwe Upload</h2>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Titel (Film, Serie of Game)</label>
+                    <input type="text" id="uploadTitle" autocomplete="off" name="no-autofill-title" class="w-full bg-dragon-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-dragon-red transition" placeholder="Bv. The Matrix (1999)">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-[#f5c518] mb-1"><i class="fa-brands fa-imdb"></i> IMDb Link <span class="text-gray-400 font-normal">(Optioneel)</span></label>
+                    <input type="url" id="uploadImdbLink" autocomplete="off" name="no-autofill-imdb" class="w-full bg-dragon-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-dragon-red transition text-sm" placeholder="https://www.imdb.com/title/tt0133093/">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Beschrijving / Plot</label>
+                    <textarea id="uploadDesc" rows="4" class="w-full bg-dragon-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-dragon-red transition" placeholder="Wordt automatisch ingevuld na kiezen van bestand of typen..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Categorie</label>
+                    <select id="uploadCategory" class="w-full bg-dragon-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-dragon-red transition">
+                        <option value="film">Film</option>
+                        <option value="serie">Serie</option>
+                        <option value="game">Game</option>
+                        <option value="anders">Anders</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">.torrent Bestand <span class="text-xs text-gray-500">(Max 1MB)</span></label>
+                    <div class="relative border-2 border-dashed border-gray-600 rounded-xl p-6 text-center hover:border-dragon-red transition cursor-pointer bg-dragon-900" onclick="document.getElementById('uploadFile').click()">
+                        <i class="fa-solid fa-file-arrow-up text-3xl text-gray-500 mb-2"></i>
+                        <p class="text-sm text-gray-400 font-bold" id="fileNameDisplay">Klik om bestand te kiezen (Auto-vult titel & plot!)</p>
+                        <input type="file" id="uploadFile" accept=".torrent" class="hidden" onchange="handleFileSelect(event)">
+                    </div>
+                </div>
+
+                <button id="submitUploadBtn" onclick="submitTorrent()" class="w-full dragon-button py-3 rounded-lg font-bold text-white shadow-lg mt-4 flex items-center justify-center gap-2 transition-all">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Bestand Uploaden
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="contactModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-overlay opacity-0 transition-opacity duration-300">
+        <div class="bg-dragon-800 border border-dragon-red/50 rounded-2xl w-full max-w-md p-8 relative transform scale-95 transition-transform duration-300 shadow-2xl">
+            <button onclick="closeModal('contactModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h2 class="text-2xl font-title font-bold mb-6 flex items-center gap-2"><i class="fa-solid fa-paper-plane text-dragon-red"></i> Probleem melden</h2>
+            <form id="contactForm" onsubmit="sendDiscordWebhook(event)" class="space-y-4">
+                <div><input type="text" id="contactName" required autocomplete="off" class="w-full bg-dragon-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-dragon-red" placeholder="Jouw naam"></div>
+                <div><input type="email" id="contactEmail" required autocomplete="off" class="w-full bg-dragon-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-dragon-red" placeholder="jouw@email.nl"></div>
+                <div><textarea id="contactMessage" required rows="4" class="w-full bg-dragon-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-dragon-red" placeholder="Beschrijf het probleem met de website of download..."></textarea></div>
+                <button type="submit" id="submitContactBtn" class="w-full dragon-button py-3 rounded-lg font-bold text-white shadow-lg mt-2 flex items-center justify-center gap-2">Verstuur Bericht</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="loginModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-overlay opacity-0 transition-opacity duration-300">
+        <div class="bg-dragon-800 border border-dragon-red/50 rounded-2xl w-full max-w-md p-8 relative transform scale-95 transition-transform duration-300 shadow-2xl">
+            <button onclick="closeModal('loginModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h2 class="text-3xl font-title font-bold text-center mb-6 dragon-gradient-text" id="authTitle">Inloggen</h2>
+            <div class="space-y-4">
+                <div><input type="email" id="emailInput" class="w-full bg-dragon-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-dragon-red" placeholder="E-mailadres"></div>
+                <div><input type="password" id="passwordInput" class="w-full bg-dragon-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-dragon-red" placeholder="Wachtwoord"></div>
+                <button id="emailAuthBtn" onclick="handleEmailAuth()" class="w-full dragon-button py-3 rounded-lg font-bold text-white shadow-lg mt-2">Inloggen</button>
+                <div class="flex items-center my-4"><div class="flex-grow border-t border-gray-700"></div><span class="px-3 text-gray-500 text-sm">OF</span><div class="flex-grow border-t border-gray-700"></div></div>
+                <button id="googleAuthBtn" onclick="loginWithGoogle()" class="w-full bg-white hover:bg-gray-100 text-gray-900 font-semibold py-3 rounded-lg transition flex items-center justify-center gap-3">
+                    <img id="googleAuthIcon" src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
+                    <span id="googleAuthText">Inloggen met Google</span>
+                </button>
+            </div>
+            <p class="text-center mt-6 text-sm text-gray-400"><span id="authToggleText">Nog geen account?</span> <button onclick="toggleAuthMode()" class="text-dragon-red hover:underline font-semibold ml-1" id="authToggleBtn">Registreer hier</button></p>
+        </div>
+    </div>
+
+    <div id="profileModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-overlay opacity-0 transition-opacity duration-300">
+        <div class="bg-dragon-800 border border-gray-700 rounded-2xl w-full max-w-md p-6 relative transform scale-95 transition-transform duration-300 shadow-2xl overflow-y-auto max-h-[90vh] custom-scrollbar">
+            <button onclick="closeModal('profileModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h2 class="text-2xl font-title font-bold text-center mb-6">Mijn Profiel</h2>
+            <div class="flex flex-col items-center mb-6 relative group">
+                <div class="relative cursor-pointer" onclick="document.getElementById('avatarUpload').click()">
+                    <img id="profileAvatarPreview" src="https://placehold.co/100x100/d91e18/white?text=U" class="w-24 h-24 rounded-full border-2 border-gray-600 object-cover shadow-lg group-hover:opacity-50 transition" alt="Profile">
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-camera text-2xl text-white"></i></div>
+                </div>
+                <input type="file" id="avatarUpload" accept="image/*" class="hidden" onchange="handleAvatarSelect(event)">
+            </div>
+            <div class="space-y-4">
+                <div><input type="text" id="profileName" class="w-full bg-dragon-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-dragon-red" placeholder="Weergavenaam"></div>
+                <button id="saveProfileBtn" onclick="saveProfile()" class="w-full dragon-button py-3 rounded-lg font-bold text-white shadow-lg mt-4 flex items-center justify-center gap-2"><i class="fa-solid fa-floppy-disk"></i> Opslaan</button>
+                <div class="mt-6 pt-4 border-t border-gray-800">
+                    <h3 class="text-md font-bold mb-3 text-gray-300"><i class="fa-solid fa-cloud-arrow-up text-dragon-red"></i> Mijn Uploads</h3>
+                    <div id="myUploadsList" class="max-h-40 overflow-y-auto space-y-2 pr-2 custom-scrollbar"></div>
+                </div>
+                <div class="mt-6 pt-4 border-t border-gray-800 flex justify-between gap-4">
+                    <button onclick="logoutUser()" class="flex-1 bg-dragon-900 border border-gray-700 hover:bg-gray-700 py-2 rounded text-sm text-gray-300 transition"><i class="fa-solid fa-right-from-bracket"></i> Uitloggen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="detailModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-overlay opacity-0 transition-opacity duration-300">
+        <div class="bg-dragon-800 border border-dragon-red/50 rounded-2xl w-full max-w-2xl p-0 relative transform scale-95 transition-transform duration-300 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="h-64 bg-dragon-900 relative border-b border-dragon-red/30 flex items-center justify-center overflow-hidden">
+                <div id="detailHeaderBg" class="absolute inset-0 opacity-40 bg-cover bg-center transition-all"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-dragon-800 to-transparent z-0"></div>
+                <button onclick="closeModal('detailModal')" class="absolute top-4 right-4 z-10 bg-black/50 w-8 h-8 rounded-full text-white hover:bg-dragon-red transition flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                
+                <div class="absolute bottom-4 left-6 right-6 z-10">
+                    <span id="detailCategory" class="bg-dragon-red text-white text-xs font-bold px-2 py-1 rounded mb-2 inline-block uppercase tracking-wide">Film</span>
+                    <h2 id="detailTitle" class="text-3xl sm:text-4xl font-title font-bold text-white truncate shadow-black drop-shadow-lg">Laden...</h2>
+                    <p class="text-gray-300 text-sm mt-1">Geüpload door: <span id="detailUploader" class="text-dragon-orange font-semibold">...</span></p>
+                </div>
+            </div>
+            <div class="p-6 overflow-y-auto custom-scrollbar">
+                <div class="flex flex-wrap gap-4 mb-6 p-4 bg-dragon-900 rounded-xl border border-gray-800 shadow-inner">
+                    <div class="flex items-center gap-2"><span class="bg-[#f5c518] text-black font-bold text-xs px-2 py-1 rounded">IMDb</span><span id="detailImdb" class="font-bold text-lg ml-2">--</span><span class="text-gray-500 text-sm">/10</span></div>
+                    <div class="w-px h-8 bg-gray-700 hidden sm:block"></div>
+                    <div class="flex items-center gap-2"><img src="https://upload.wikimedia.org/wikipedia/commons/5/5b/Rotten_Tomatoes.svg" class="w-6 h-6" alt="RT"><span id="detailRotten" class="font-bold text-lg ml-1">--%</span></div>
+                </div>
+                <h3 class="font-bold text-lg mb-2 border-b border-gray-700 pb-2">Over deze release</h3>
+                <p id="detailDesc" class="text-gray-300 text-sm leading-relaxed mb-6 whitespace-pre-wrap">...</p>
+                <div class="bg-dragon-900/50 p-4 rounded-xl border border-dragon-red/20 text-center">
+                    <div class="flex flex-col sm:flex-row justify-center gap-4">
+                        <button id="downloadBtn" class="dragon-button w-full sm:w-auto px-8 py-3 rounded-lg font-bold text-lg shadow-lg flex items-center justify-center gap-3"><i class="fa-solid fa-magnet"></i> Download Torrent</button>
+                        <a id="imdbLinkBtn" href="#" target="_blank" class="hidden bg-[#f5c518] hover:bg-yellow-400 text-black w-full sm:w-auto px-8 py-3 rounded-lg font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition"><i class="fa-brands fa-imdb text-2xl"></i> Bekijk op IMDb</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 z-[60] bg-dragon-800 border-l-4 border-dragon-red text-white px-6 py-4 rounded shadow-2xl flex items-center gap-3">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-dragon-red text-xl"></i>
+        <span id="toastMsg" class="font-medium">Bericht</span>
+    </div>
+    
+    <div id="google_translate_element" style="display:none;"></div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() { new google.translate.TranslateElement({pageLanguage: 'nl', autoDisplay: false}, 'google_translate_element'); }
+        function setLanguage(lang) {
+            var teCombo = document.querySelector('.goog-te-combo');
+            if (teCombo) {
+                teCombo.value = lang;
+                teCombo.dispatchEvent(new Event('change'));
+                showToast('Taal gewijzigd naar ' + lang.toUpperCase(), 'success');
+            } else {
+                showToast('Vertaalmodule is nog aan het laden, probeer het zo opnieuw.', 'error');
+            }
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, sendEmailVerification, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'dragon-torrents-app';
+        const firebaseConfig = {
+            apiKey: "AIzaSyCVdP_qOZh6uWDXBRexMwP_ltEmwNbpRi4",
+            authDomain: "dragon-torrents.firebaseapp.com",
+            projectId: "dragon-torrents",
+            storageBucket: "dragon-torrents.firebasestorage.app",
+            messagingSenderId: "604035609317",
+            appId: "1:604035609317:web:76dfa2e1aba4295b3d5a0c"
+        };
+        
+        let app, db, auth;
+        let isRegisterMode = false;
+        let currentFile = null, currentFileName = null, currentFileData = null;
+        let newAvatarDataUrl = null;
+        let torrentsList = [];
+        let unsubscribeTorrents = null;
+        let currentFilter = 'alles';
+        let typingTimer;
+        let fetchedMetadataGlobal = null; 
+
+        window.openModal = function(id) { const m = document.getElementById(id); if(m) { m.classList.remove('hidden'); m.classList.add('flex'); void m.offsetWidth; m.classList.remove('opacity-0'); m.querySelector('div').classList.remove('scale-95'); } }
+        window.closeModal = function(id) { const m = document.getElementById(id); if(m) { m.classList.add('opacity-0'); m.querySelector('div').classList.add('scale-95'); setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300); } }
+        window.closeAllModals = function() { ['loginModal', 'uploadModal', 'detailModal', 'profileModal', 'contactModal'].forEach(window.closeModal); }
+        window.showToast = function(msg, type = 'success') {
+            const t = document.getElementById('toast'); if(!t) return;
+            document.getElementById('toastMsg').innerText = msg;
+            t.classList.replace(type === 'error' ? 'border-dragon-red' : 'border-red-600', type === 'error' ? 'border-red-600' : 'border-dragon-red');
+            document.getElementById('toastIcon').className = type === 'error' ? 'fa-solid fa-circle-exclamation text-red-600 text-xl' : 'fa-solid fa-circle-check text-dragon-red text-xl';
+            t.classList.remove('translate-y-20', 'opacity-0'); setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 3500);
+        }
+        window.toggleAuthMode = function() {
+            isRegisterMode = !isRegisterMode;
+            document.getElementById('authTitle').innerText = isRegisterMode ? 'Account Maken' : 'Inloggen';
+            document.getElementById('emailAuthBtn').innerText = isRegisterMode ? 'Registreren' : 'Inloggen';
+            document.getElementById('authToggleText').innerText = isRegisterMode ? 'Al een account?' : 'Nog geen account?';
+            document.getElementById('authToggleBtn').innerText = isRegisterMode ? 'Log hier in' : 'Registreer hier';
+        }
+
+        try { app = initializeApp(firebaseConfig); db = getFirestore(app); auth = getAuth(app); } catch (e) { console.error("Firebase init error:", e); }
+
+        async function initAuth() {
+            if (!auth) return;
+            await auth.authStateReady(); 
+            
+            try { 
+                if (!auth.currentUser) await signInAnonymously(auth); 
+            } catch (e) { console.warn("Anoniem inloggen faalde", e); }
+
+            onAuthStateChanged(auth, (user) => {
+                if (!user) return;
+                const navLoginBtn = document.getElementById('navLoginBtn'), userInfo = document.getElementById('userInfo'), navUploadBtn = document.getElementById('navUploadBtn'), heroBtn = document.getElementById('heroActionBtn'), verificationBanner = document.getElementById('verificationBanner');
+
+                if (!user.isAnonymous) {
+                    navLoginBtn.classList.add('hidden'); userInfo.classList.remove('hidden'); userInfo.classList.add('flex');
+                    if (user.emailVerified || user.providerData.some(p => p.providerId === 'google.com')) {
+                        navUploadBtn.classList.remove('hidden'); navUploadBtn.classList.add('flex');
+                        if (verificationBanner) verificationBanner.classList.add('hidden');
+                        if (heroBtn) { heroBtn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up mr-2"></i> Upload Torrent`; heroBtn.onclick = () => openModal('uploadModal'); }
+                    } else {
+                        navUploadBtn.classList.add('hidden'); navUploadBtn.classList.remove('flex');
+                        if (verificationBanner) { verificationBanner.classList.remove('hidden'); verificationBanner.classList.add('flex'); }
+                        if (heroBtn) { heroBtn.innerHTML = `<i class="fa-solid fa-envelope mr-2"></i> Verifieer E-mail`; heroBtn.onclick = () => showToast('Check je inbox om te verifiëren.', 'error'); }
+                    }
+                    const avatar = document.getElementById('navAvatar');
+                    if (user.photoURL) avatar.src = user.photoURL;
+                    else if (user.email) avatar.src = `https://placehold.co/40x40/d91e18/white?text=${user.email.charAt(0).toUpperCase()}`;
+                } else {
+                    navLoginBtn.classList.remove('hidden'); userInfo.classList.add('hidden'); userInfo.classList.remove('flex');
+                    navUploadBtn.classList.add('hidden'); navUploadBtn.classList.remove('flex');
+                    if (heroBtn) { heroBtn.innerHTML = `Word nu lid`; heroBtn.onclick = () => openModal('loginModal'); }
+                }
+                if (!unsubscribeTorrents) fetchTorrents();
+            });
+        }
+
+        // --- GEBRUIKT JOUW EIGEN OMDB SLEUTEL (9ef39d95) MET AUTOMATISCHE BESTANDSNAAM-HERKENNING ---
+        window.fetchMetadata = async function(title, imdbUrl) {
+            let imdbId = null;
+            if (imdbUrl) { 
+                const match = imdbUrl.match(/tt\d+/); 
+                if (match) imdbId = match[0]; 
+            }
+
+            let result = { poster: null, plot: null, imdb: 'N/A', rotten: 'N/A', imdbID: imdbId };
+            let cleanTitle = document.getElementById('uploadTitle').value || title || '';
+            cleanTitle = cleanTitle.replace(/\(\d{4}\)/g, '').replace(/\b(1080p|720p|4k|x264|x265|webrip|bluray|dvdrip|hdtv|yify|nl subs|nl|subs|xvid)\b/gi, '').replace(/[\[\]\.\-\_]/g, ' ').replace(/\s+/g, ' ').trim();
+
+            const OMDB_KEY = "9ef39d95"; 
+
+            if (!cleanTitle && !imdbId) return result;
+
+            try {
+                let url = imdbId ? 
+                    `https://www.omdbapi.com/?i=${imdbId}&apikey=${OMDB_KEY}&plot=full` : 
+                    `https://www.omdbapi.com/?t=${encodeURIComponent(cleanTitle)}&apikey=${OMDB_KEY}&plot=full`;
+                
+                const res = await fetch(url);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.Response === "True") {
+                        if (data.Poster && data.Poster !== "N/A") result.poster = data.Poster;
+                        if (data.Plot && data.Plot !== "N/A") result.plot = data.Plot;
+                        if (data.imdbRating && data.imdbRating !== "N/A") result.imdb = data.imdbRating;
+                        if (data.imdbID) result.imdbID = data.imdbID;
+                        if (data.Title && !document.getElementById('uploadTitle').value) {
+                            document.getElementById('uploadTitle').value = data.Title + (data.Year ? ` (${data.Year})` : '');
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("OMDb Fetch Error:", e);
+            }
+
+            return result;
+        };
+
+        window.autoFillMetadata = async function(title, imdbUrl) {
+            if (!imdbUrl && !title) return; 
+            const descEl = document.getElementById('uploadDesc');
+            
+            descEl.value = "";
+            descEl.placeholder = "Bleep bloop... OMDb doorzoeken... ⏳";
+            
+            const result = await fetchMetadata(title, imdbUrl);
+            fetchedMetadataGlobal = result; 
+            
+            if (result.plot) {
+                descEl.value = result.plot;
+                showToast('Informatie en poster succesvol gevonden!', 'success');
+            } else {
+                descEl.placeholder = "Geen info gevonden. Controleer de link of typ zelf een beschrijving...";
+                showToast('Kon geen info vinden.', 'error');
+            }
+            if (result.imdbID && !document.getElementById('uploadImdbLink').value) {
+                document.getElementById('uploadImdbLink').value = `https://www.imdb.com/title/${result.imdbID}/`;
+            }
+        };
+
+        window.sendDiscordWebhook = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitContactBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verzenden...'; btn.disabled = true;
+
+            const name = document.getElementById('contactName').value;
+            const email = document.getElementById('contactEmail').value;
+            const msg = document.getElementById('contactMessage').value;
+            const webhookUrl = "https://discord.com/api/webhooks/1539289477262872617/7RG8nzgZsnmgj4IJbycQuv_3Pbc7W71kMIN1DjLRwtcbx7GaP77qXi5I2qkX8MfCPj0j";
+
+            const payload = {
+                username: "Dragon-Torrents Contact",
+                avatar_url: "https://i.imgur.com/rXf15i4.png", 
+                embeds: [{
+                    title: "Nieuw Bericht / Probleem",
+                    color: 14228992,
+                    fields: [
+                        { name: "Naam", value: name, inline: true },
+                        { name: "E-mail", value: email, inline: true },
+                        { name: "Bericht", value: msg }
+                    ],
+                    footer: { text: "Dragon-Torrents Systeem" },
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            try {
+                await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                showToast('Je bericht is verzonden!');
+                document.getElementById('contactForm').reset();
+                closeModal('contactModal');
+            } catch (err) {
+                showToast('Fout bij verzenden.', 'error');
+            } finally {
+                btn.innerHTML = originalText; btn.disabled = false;
+            }
+        }
+
+        window.submitTorrent = async function() {
+            const title = document.getElementById('uploadTitle').value;
+            const imdbLink = document.getElementById('uploadImdbLink').value;
+            let desc = document.getElementById('uploadDesc').value;
+            const category = document.getElementById('uploadCategory').value;
+
+            if (!title || !currentFile || !currentFileName) return showToast('Titel en bestand verplicht.', 'error');
+
+            const btn = document.getElementById('submitUploadBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-satellite-dish fa-spin"></i> Bezig met opslaan...'; btn.disabled = true;
+
+            try {
+                let apiData = fetchedMetadataGlobal;
+                if (!apiData) apiData = await fetchMetadata(title, imdbLink);
+                
+                let stats = { imdb: apiData?.imdb || 'N/A', rotten: apiData?.rotten || 'N/A', trakt: 'N/A' };
+                if (apiData?.plot && !desc) desc = apiData.plot;
+                
+                const torrentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'torrents');
+                const currentUser = auth && auth.currentUser ? auth.currentUser : { uid: 'anonymous', displayName: 'Anonymous' };
+                const uploaderName = currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Unknown');
+
+                const docData = {
+                    title: title, description: desc || 'Geen beschrijving.', category: category, 
+                    fileName: currentFileName, fileData: currentFileData, unraidFileName: null, 
+                    uploaderId: currentUser.uid, uploaderName: uploaderName, stats: stats, 
+                    poster: apiData?.poster || null, imdbID: apiData?.imdbID || null, createdAt: serverTimestamp() 
+                };
+                Object.keys(docData).forEach(key => docData[key] === undefined ? delete docData[key] : {});
+
+                const newDocRef = await addDoc(torrentsRef, docData);
+                showToast('Succesvol opgeslagen in de cloud!');
+                
+                const fileToUploadToNAS = currentFile;
+                
+                document.getElementById('uploadTitle').value = ''; document.getElementById('uploadImdbLink').value = ''; 
+                document.getElementById('uploadDesc').value = ''; document.getElementById('uploadFile').value = '';
+                document.getElementById('fileNameDisplay').innerText = 'Klik om bestand te kiezen'; 
+                currentFile = null; currentFileName = null; currentFileData = null; fetchedMetadataGlobal = null;
+                closeModal('uploadModal');
+                
+                try {
+                    if (fileToUploadToNAS) {
+                        const NAS_IP = "192.168.178.88"; 
+                        const NAS_PORT = "3000"; 
+                        const watchPath = "/mnt/user/media/Movies/"; 
+
+                        const formData = new FormData();
+                        formData.append("file", fileToUploadToNAS);
+                        formData.append("path", watchPath);
+
+                        const nasRes = await fetch(`http://${NAS_IP}:${NAS_PORT}/upload`, {
+                            method: "POST",
+                            body: formData
+                        });
+
+                        if (nasRes.ok) {
+                            showToast("Succesvol naar Stream-Tower gestuurd!", "success");
+                        } else {
+                            console.error("NAS upload mislukt:", nasRes.statusText);
+                            showToast("Upload naar NAS mislukt.", "error");
+                        }
+                    }
+                } catch (e) {
+                    console.error("Fout bij upload naar NAS", e);
+                    showToast("Netwerkfout richting NAS.", "error");
+                }
+            } catch (err) {
+                console.error("Fout bij het opslaan in de database:", err);
+                showToast("Fout opgetreden bij het uploaden.", "error");
+            } finally {
+                btn.innerHTML = originalText; 
+                btn.disabled = false;
+            }
+        }
+
+        function fetchTorrents() {
+            if (!auth || !auth.currentUser) return; 
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'torrents'));
+            
+            if(unsubscribeTorrents) unsubscribeTorrents(); 
+            
+            unsubscribeTorrents = onSnapshot(q, (snapshot) => {
+                torrentsList = []; snapshot.forEach(doc => torrentsList.push({ id: doc.id, ...doc.data() }));
+                torrentsList.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+                renderTorrents(document.getElementById('searchInput').value, currentFilter);
+            }, (error) => {
+                if (error.code === 'permission-denied') {
+                    document.getElementById('torrentGrid').innerHTML = `<div class="col-span-full text-center text-dragon-red py-20"><i class="fa-solid fa-lock text-5xl mb-4"></i><p class="font-bold text-xl">Database Vergrendeld</p><p class="text-sm mt-2">Update je Firestore Rules om dit te verhelpen.</p></div>`;
+                }
+            });
+        }
+
+        window.renderTorrents = function(searchStr = '', category = currentFilter) {
+            currentFilter = category;
+            const grid = document.getElementById('torrentGrid'); grid.innerHTML = '';
+            const filtered = torrentsList.filter(t => {
+                const titleMatch = (t.title || '').toLowerCase().includes(searchStr.toLowerCase()) || (t.uploaderName || '').toLowerCase().includes(searchStr.toLowerCase());
+                const catMatch = category === 'alles' || t.category === category;
+                return titleMatch && catMatch;
+            });
+            
+            if (filtered.length === 0) return grid.innerHTML = `<div class="col-span-full text-center py-20 text-gray-500"><i class="fa-solid fa-ghost text-5xl mb-4 opacity-50"></i><p>Geen torrents gevonden.</p></div>`;
+
+            filtered.forEach(t => {
+                let imageHtml = t.poster && t.poster.startsWith('http') 
+                    ? `<img src="${t.poster}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-500">`
+                    : `<div class="w-full h-full bg-dragon-800 flex items-center justify-center opacity-80 border border-dragon-red/20"><span class="text-dragon-red/50 font-bold tracking-widest uppercase">Geen Poster</span></div>`;
+                
+                grid.innerHTML += `
+                    <div class="torrent-card rounded-xl overflow-hidden cursor-pointer group flex flex-col h-full relative" onclick="openTorrentDetails('${t.id}')">
+                        <div class="h-64 relative bg-dragon-900 overflow-hidden">
+                            ${imageHtml}
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#0f0c0c] via-transparent to-transparent"></div>
+                            <div class="absolute top-3 right-3 bg-dragon-900/80 rounded p-1.5 backdrop-blur border border-dragon-red/30"><span class="text-[#f5c518] text-xs font-bold"><i class="fa-solid fa-star mr-1"></i> ${t.stats?.imdb||'N/A'}</span></div>
+                        </div>
+                        <div class="p-4 flex-grow flex flex-col justify-between">
+                            <div><h4 class="font-title font-bold text-lg leading-tight mb-2 group-hover:text-dragon-red transition truncate">${t.title || 'Onbekend'}</h4></div>
+                            <div class="text-xs text-gray-500 flex justify-between items-center border-t border-gray-800 pt-2 mt-2"><span><i class="fa-solid fa-user-ninja"></i> ${t.uploaderName || 'Unknown'}</span> <i class="fa-solid fa-download text-dragon-red/50 group-hover:text-dragon-red"></i></div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        window.openTorrentDetails = function(id) {
+            const t = torrentsList.find(x => x.id === id); if(!t) return;
+            document.getElementById('detailTitle').innerText = t.title || 'Onbekend'; document.getElementById('detailCategory').innerText = t.category || 'Anders';
+            document.getElementById('detailUploader').innerText = t.uploaderName || 'Unknown'; document.getElementById('detailDesc').innerText = t.description || 'Geen beschrijving beschikbaar.';
+            
+            if(t.poster && t.poster.startsWith('http')) {
+                document.getElementById('detailHeaderBg').style.backgroundImage = `url('${t.poster}')`;
+                document.getElementById('detailHeaderBg').style.display = 'block';
+            } else {
+                document.getElementById('detailHeaderBg').style.display = 'none'; 
+            }
+            
+            document.getElementById('detailImdb').innerText = t.stats?.imdb || '--'; document.getElementById('detailRotten').innerText = t.stats?.rotten !== 'N/A' ? t.stats?.rotten : '--%';
+            
+            const imdbBtn = document.getElementById('imdbLinkBtn');
+            if (t.imdbID) { imdbBtn.href = `https://www.imdb.com/title/${t.imdbID}/`; imdbBtn.classList.remove('hidden'); imdbBtn.classList.add('flex'); } 
+            else { imdbBtn.classList.add('hidden'); imdbBtn.classList.remove('flex'); }
+            
+            document.getElementById('downloadBtn').onclick = () => {
+                if(!t.fileData) return showToast('Bestand mist in cloud.', 'error');
+                const link = document.createElement('a'); link.href = t.fileData; link.download = t.fileName || 'download.torrent'; link.click();
+            };
+            openModal('detailModal');
+        }
+
+        window.generateRSS = function() {
+            let rss = `<?xml version="1.0" encoding="UTF-8" ?>\n<rss version="2.0">\n<channel>\n<title>Dragon-Torrents Feed</title>\n<link>https://dragon-torrents.duckdns.org</link>\n<description>Nieuwste releases</description>\n`;
+            torrentsList.slice(0,20).forEach(t => { rss += `<item>\n<title>${t.title}</title>\n<description>${t.description}</description>\n</item>\n`; });
+            rss += `</channel>\n</rss>`;
+            const blob = new Blob([rss], { type: 'text/xml' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'dragon_torrents.xml'; a.click(); window.URL.revokeObjectURL(url);
+            showToast('RSS Feed gedownload!');
+        }
+
+        // AUTOMATISCHE BESTANDSNAAM HERKENNING & AUTO-FILL
+        window.handleFileSelect = function(e) {
+            const file = e.target.files[0]; if (!file || !file.name.endsWith('.torrent')) return;
+            document.getElementById('fileNameDisplay').innerText = file.name; currentFile = file; currentFileName = file.name;
+            const reader = new FileReader(); reader.onload = (ev) => currentFileData = ev.target.result; reader.readAsDataURL(file);
+            
+            // Haal automatisch de titel uit de torrent bestandsnaam en zoek op!
+            let rawName = file.name.replace('.torrent', '');
+            let guessedTitle = rawName.replace(/\b(1080p|720p|4k|x264|x265|webrip|bluray|dvdrip|hdtv|yify|nl subs|nl|subs|xvid|repack|extended)\b/gi, '').replace(/[\[\]\.\-\_]/g, ' ').replace(/\s+/g, ' ').trim();
+            
+            const titleInput = document.getElementById('uploadTitle');
+            if (titleInput) {
+                titleInput.value = guessedTitle;
+                window.autoFillMetadata(guessedTitle, '');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const searchEl = document.getElementById('searchInput');
+            if(searchEl) searchEl.addEventListener('input', (e) => window.renderTorrents(e.target.value, window.currentFilter));
+            
+            const uploadTitleEl = document.getElementById('uploadTitle');
+            const uploadImdbEl = document.getElementById('uploadImdbLink');
+
+            const triggerAutoFill = () => {
+                clearTimeout(typingTimer);
+                const imdbVal = uploadImdbEl ? uploadImdbEl.value.trim() : '';
+                const titleVal = uploadTitleEl ? uploadTitleEl.value.trim() : '';
+                if (imdbVal.includes('tt') || titleVal.length > 3) {
+                    typingTimer = setTimeout(() => window.autoFillMetadata(titleVal, imdbVal), 800);
+                }
+            };
+
+            if(uploadTitleEl) uploadTitleEl.addEventListener('input', triggerAutoFill);
+            if(uploadImdbEl) {
+                uploadImdbEl.addEventListener('input', triggerAutoFill);
+                uploadImdbEl.addEventListener('paste', () => setTimeout(triggerAutoFill, 100));
+            }
+            
+            initAuth();
+        });
+
+        window.handleEmailAuth = async function() {
+            const e = document.getElementById('emailInput').value, p = document.getElementById('passwordInput').value;
+            if(!e || !p) return showToast('Vul alles in.', 'error');
+            try { if (isRegisterMode) { const c = await createUserWithEmailAndPassword(auth, e, p); await sendEmailVerification(c.user); showToast('Gemaakt! Check e-mail.'); } else { await signInWithEmailAndPassword(auth, e, p); } } catch (err) { showToast('Fout bij inloggen.', 'error'); }
+        }
+        window.loginWithGoogle = async function() { try { const p = new GoogleAuthProvider(); await signInWithPopup(auth, p); } catch (e) {} }
+        window.logoutUser = async function() { await signOut(auth); showToast('Uitgelogd.'); setTimeout(() => window.location.reload(), 1000); }
+        
+        window.openProfileModal = async function() {
+            const user = auth.currentUser; if(!user || user.isAnonymous) return;
+            document.getElementById('profileName').value = user.displayName || '';
+            document.getElementById('profileAvatarPreview').src = user.photoURL || `https://placehold.co/100x100/d91e18/white?text=U`;
+            const myUploadsList = document.getElementById('myUploadsList'); myUploadsList.innerHTML = '';
+            torrentsList.filter(t => t.uploaderId === user.uid).forEach(t => {
+                myUploadsList.innerHTML += `
+                <div class="flex justify-between items-center bg-dragon-900 p-2 text-sm text-gray-300 rounded mb-1 border border-gray-700">
+                    <span class="truncate pr-2">${t.title}</span>
+                    <button onclick="deleteTorrent('${t.id}', '${t.unraidFileName||''}', this)" class="text-gray-500 hover:text-red-500 transition px-2"><i class="fa-solid fa-trash"></i></button>
+                </div>`;
+            });
+            openModal('profileModal');
+        }
+
+        let deleteConfirmId = null;
+        window.deleteTorrent = async function(id, filename, btn) {
+            if (deleteConfirmId !== id) {
+                deleteConfirmId = id; 
+                btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Zeker?'; btn.classList.add('text-red-500');
+                setTimeout(() => { deleteConfirmId = null; if(btn) { btn.innerHTML = '<i class="fa-solid fa-trash"></i>'; btn.classList.remove('text-red-500'); } }, 3000);
+                return;
+            }
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'torrents', id));
+                if(filename) fetch(`https://dragon-torrents.duckdns.org/delete/${filename}`, { method: 'DELETE' }).catch(e=>console.log(e));
+                showToast('Torrent definitief verwijderd!'); openProfileModal(); 
+            } catch(e) { showToast('Fout bij verwijderen.', 'error'); }
+        }
+
+        window.saveProfile = async function() {
+            const name = document.getElementById('profileName').value;
+            if(name) await updateProfile(auth.currentUser, { displayName: name });
+            if(newAvatarDataUrl) await updateProfile(auth.currentUser, { photoURL: newAvatarDataUrl });
+            showToast('Opgeslagen!'); closeModal('profileModal');
+        }
+
+        window.handleAvatarSelect = function(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => { 
+                const img = new Image(); img.onload = () => {
+                    const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+                    let w = img.width, h = img.height; const max = 300;
+                    if(w > h) { if(w > max) { h *= max/w; w = max; } } else { if(h > max) { w *= max/h; h = max; } }
+                    canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h);
+                    newAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    document.getElementById('profileAvatarPreview').src = newAvatarDataUrl;
+                }; img.src = e.target.result;
+            }; reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>
