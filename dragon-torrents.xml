@@ -10,7 +10,7 @@
   <Project>https://dragon-torrents.web.app</Project>
   <Overview>A sleek, lightning-fast, and feature-rich WebUI for sharing and downloading torrent files within your community. Built with a beautiful dark-mode TailwindCSS interface and powered by an ultra-lightweight Nginx Alpine Docker container.</Overview>
   <Category>Downloaders:Other;</Category>
-  <WebUI>http://[IP]:[PORT:8080]</WebUI>
+  <WebUI>http://[IP]:[PORT:80]</WebUI>
   <TemplateURL/>
   <Icon>https://raw.githubusercontent.com/PandaBoyNL/Dragon-Torrents-Site/main/icon.png</Icon>
   <ExtraParams/>
