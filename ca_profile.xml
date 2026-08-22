@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Repository>
+  <Name>PandaBoyNL's Repository</Name>
+  <Author>PandaBoyNL</Author>
+  <Description>De officiële repository van PandaBoyNL. Bevat custom Docker WebUI's voor Unraid, waaronder Dragon-Torrents en Torrent Maker Pro.</Description>
+  <URL>https://github.com/PandaBoyNL/Dragon-Torrents-Site</URL>
+  <DonateText>Support mijn projecten met een bakje koffie! ☕</DonateText>
+  <DonateLink>https://www.paypal.com/paypalme/PandaBoyNL</DonateLink>
+  <DonateImg>https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif</DonateImg>
+  <Profile>https://forums.unraid.net/</Profile>
+</Repository>
