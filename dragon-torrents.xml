@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>Dragon-Torrents</Name>
+  <Repository>pandaboynl/dragon-torrents:latest</Repository>
+  <Registry>https://hub.docker.com/r/pandaboynl/dragon-torrents/</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/PandaBoyNL/Dragon-Torrents-Site/issues</Support>
+  <Project>https://dragon-torrents.web.app</Project>
+  <Overview>A sleek, lightning-fast, and feature-rich WebUI for sharing and downloading torrent files within your community. Built with a beautiful dark-mode TailwindCSS interface and powered by an ultra-lightweight Nginx Alpine Docker container.</Overview>
+  <Category>Downloaders:Other;</Category>
+  <WebUI>http://[IP]:[PORT:8080]</WebUI>
+  <TemplateURL/>
+  <Icon>https://raw.githubusercontent.com/PandaBoyNL/Dragon-Torrents-Site/main/icon.png</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText>Buy me a coffee</DonateText>
+  <DonateLink>https://www.paypal.com/paypalme/PandaBoyNL</DonateLink>
+  <Requires/>
+  <Config Name="WebUI Port" Target="80" Default="8080" Mode="tcp" Description="De poort voor de webinterface. Als 8080 al in gebruik is, verander dit dan naar bijvoorbeeld 8081." Type="Port" Display="always" Required="true" Mask="false">8080</Config>
+</Container>
